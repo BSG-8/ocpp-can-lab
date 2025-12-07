@@ -1,0 +1,10 @@
+{
+  "name": "OCPP-CAN Lab",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.10"
+    }
+  },
+  "postCreateCommand": "bash infra/setup_vcan.sh"
+}
