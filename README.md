@@ -26,7 +26,6 @@ Bu çerçeve, **Şarj Noktası (CP)** ile **Merkezi Sistem Yönetim Sistemleri (
 - 🔀 **OCPP → CAN Çeviri Katmanı** - Şarj protokolü ile araç veri yolu arasında köprü
 - 🚌 **CAN-Bus Simülasyonu** - Gerçekçi test için sanal CAN arayüzü (vcan0)
 - 🎯 **Saldırı Senaryoları** - Modüler anomali enjeksiyon sistemi
-- 🛡️ **Geleceğe Hazır** - IDS, ML/RAG analizi ve savunma mekanizmaları için tasarlanmış
 
 ---
 
@@ -60,7 +59,7 @@ ocpp-can-lab/
 
 ## 🚀 Hızlı Başlangıç
 
-### 1️⃣ Sanal Ortamı Kurun
+### 1️⃣ Sanal Ortamı Kurun (Codespace'de mevcut gerek yok)
 
 ```bash
 python3 -m venv venv
@@ -166,15 +165,6 @@ git push origin feature/scenario_xx
 
 ---
 
-## 🔐 Yol Haritası
-
-- [ ] 12 anomali saldırı senaryosunun tamamlanması
-- [ ] CAN + OCPP için Saldırı Tespit Sistemi (IDS)
-- [ ] Telemetri ile gerçek zamanlı izleme panosu
-- [ ] Savunma scriptleri (anti-manipülasyon filtreleri)
-- [ ] Makine Öğrenimi tabanlı anomali tespiti
-- [ ] RAG (Retrieval-Augmented Generation) analiz araçları
-
 ---
 
 ## 👥 Takım İşbirliği
@@ -219,23 +209,13 @@ candump vcan0
 
 ---
 
-## 📝 Lisans
-
-Bu proje MIT Lisansı altında lisanslanmıştır - detaylar için [LICENSE](LICENSE) dosyasına bakın.
-
 ---
-
-## 🙏 Teşekkürler
-
-- OCPP spesifikasyonları için Open Charge Alliance
-- CAN bus kütüphaneleri için Python-CAN topluluğu
-- EV güvenliği alanındaki tüm katkıda bulunanlar ve araştırmacılar
 
 ---
 
 <div align="center">
 
-**EV Altyapı Güvenliği Araştırması için ❤️ ile geliştirildi**
+**CanBus Araştırması için geliştirildi**
 
 ⭐ Faydalı bulduysanız bu repo'ya yıldız verin!
 
