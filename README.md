@@ -1,115 +1,146 @@
 🔌 OCPP–CAN Security Lab
 EV Charging Infrastructure Attack/Defense Simulation Environment
+Bu proje, Elektrikli Araç (EV) şarj altyapısını güvenlik açısından test etmek için geliştirilmiş modüler bir simülasyon laboratuvarıdır.
+ Amaç, OCPP mesaj akışı ile EV iç CAN-Bus davranışını birleştirerek saldırı senaryoları ve savunma mekanizmaları geliştirmektir.
 
-This repository provides a modular lab environment for simulating Electric Vehicle (EV) charging security scenarios, including:
+⚡ Ana Özellikler
+OCPP (Open Charge Point Protocol) istemci & sunucu emülasyonu
 
-OCPP (Open Charge Point Protocol) message flow
 
-Mapping OCPP → CAN (EV internal bus)
+OCPP → CAN dönüşüm katmanı
 
-CAN-Bus simulated via vcan0
 
-Anomaly scenarios (attack scripts)
+vcan0 üzerinden CAN-Bus simülasyonu
 
-Defense mechanisms (future)
 
-The project mirrors a real CP (Charge Point) ↔ CSMS (Central System) communication pipeline and extends it into EV-side CAN behavior.
+Saldırı senaryoları (anomaly scenarios)
 
-📂 Project Structure
 
+Gelecekte: Savunma mekanizmaları, IDS, ML/RAG destekli analiz
+
+
+Bu yapı, gerçek hayattaki CP (Charge Point) ↔ CSMS (Central System) iletişim akışını simüle eder ve EV tarafındaki CAN-Bus davranışı ile genişletir.
+
+📂 Proje Yapısı
 ocpp-can-lab/
 │
-├── infra/                  # Core infrastructure
-│    ├── ocpp_client.py     # Charge Point emulator
-│    ├── ocpp_server.py     # CSMS emulator
-│    ├── mapping.py         # OCPP → CAN conversion logic
-│    ├── can_smoke_test.py  # VCAN testing tool
-│    ├── setup_vcan.sh      # VCAN initializer
+├── infra/                      # Temel altyapı bileşenleri
+│    ├── ocpp_client.py         # Charge Point emülatörü
+│    ├── ocpp_server.py         # CSMS emülatörü
+│    ├── mapping.py             # OCPP → CAN dönüşüm mantığı
+│    ├── pipeline.py            # Hook sistemi + CP işlem hattı
+│    ├── setup_vcan.sh          # VCAN kurulum scripti
 │    └── __init__.py
 │
-├── scenarios/              # All anomaly scenarios (each in its own folder)
-│    ├── _template/         # Scenario boilerplate
-│    └── scenario_00_baseline/
+├── scenarios/                  # Senaryolar (her biri kendi klasöründe)
+│    ├── _template/             # Yeni senaryolar için şablon
+│    ├── scenario_00_baseline/  # Temel senaryo (saldırı yok)
+│    └── scenario_01_*          # Örnek saldırı senaryosu
 │
-├── docs/                   # Project documentation (optional)
+├── logs/                       # Çalışma çıktıları (git tarafında ignore)
 │
-├── .devcontainer/          # GitHub Codespaces configuration
-├── .gitignore
+├── .devcontainer/              # Codespaces geliştirme ortamı
+├── requirements.txt
+├── config.json                 # Proje yapılandırma ayarları
 └── README.md
 
 
-
-
-🚀 Getting Started
-
-1. Create virtual environment
-
+🚀 Kurulum ve Çalıştırma
+1️⃣ Sanal ortam oluşturun
 python3 -m venv venv
 source venv/bin/activate
-pip install websockets python-can
+pip install -r requirements.txt
 
 
-2. Enable CAN simulation (Linux only)
-
+2️⃣ CAN simülasyon arayüzünü etkinleştirin (Linux)
 sudo bash infra/setup_vcan.sh
 
+Bu komut otomatik olarak vcan0 arayüzünü oluşturur.
 
-3. Run CSMS
-
+3️⃣ CSMS Sunucusunu Başlatın
 python -m infra.ocpp_server
 
-4. Run Charge Point
 
+4️⃣ Charge Point (CP) İstemcisini Çalıştırın
 python -m infra.ocpp_client
 
 
-🧪 Baseline Scenario
+🧪 Baseline Senaryosu
+scenario_00_baseline/ hiçbir saldırı içermeyen temel referans senaryosudur.
+ Pipeline’ın doğru çalıştığını doğrulamak için kullanılır.
+Çalıştırmak için:
+python -m scenarios.scenario_00_baseline.simulate
 
-scenarios/scenario_00_baseline/
 
-contains the simplest simulation (no attacks), used to verify pipeline behavior.
-
-
-🧩 Creating your own scenario
-
-Each scenario lives in its own folder:
-
+🧩 Yeni Senaryo Oluşturma
+Her senaryo kendi klasöründe yaşar:
 scenarios/scenario_XY_name/
+   ├── hooks.py
    ├── simulate.py
-   └── README.md
+   └── README.md (opsiyonel)
 
-Team Members can override hook functions:
-
-pre_ocpp()
-
-post_ocpp()
-
-pre_can()
-
-post_can()
-
-to modify, drop, or inject malicious traffic.
+Hook fonksiyonlarıyla manipülasyon yapabilirsiniz:
+pre_ocpp() → OCPP mesajı gönderilmeden önce
 
 
-🔐 Future Work
-
-Attack scripts for 12 anomaly scenarios
-
-Defense algorithms (IDS, filtering, validation)
-
-Integration with ML/RAG models
-
-Data logging + security reporting
+post_ocpp() → OCPP cevabı alındıktan sonra
 
 
+pre_can() → CAN frame gönderilmeden önce
 
-👥 Team Notes
 
-Everyone create a scenario folder + branch
+post_can() → CAN frame gönderildikten sonra
 
-CP pipeline ensures consistent behavior
 
-Devcontainer makes the lab usable on Windows/Mac
+Bu fonksiyonlarla:
+✔ Mesaj değiştirme
+ ✔ Sahte değer ekleme
+ ✔ Saldırı paketleri oluşturma
+ ✔ Debug arka kapısı ekleme
+ ✔ CAN frame enjeksiyonu
+gibi işlemler yapılabilir.
 
-Testing is fully reproducible via vcan
+🛠 Geliştirici Rehberi (Kısa)
+➤ Yeni senaryo için:
+git checkout dev
+git pull
+git checkout -b feature/senaryo_xx
+
+cp -r scenarios/_template scenarios/scenario_xx_yeni_senaryo
+
+Test:
+python -m scenarios.scenario_xx_yeni_senaryo.simulate
+
+Commit:
+git add .
+git commit -m "Senaryo XX eklendi"
+git push origin feature/senaryo_xx
+
+Pull Request aç → dev branch’ine merge edilir.
+
+🔐 Gelecek Çalışmalar (Roadmap)
+12 anomaly senaryosunun tam saldırı modelleri
+
+
+CAN + OCPP için IDS (Intrusion Detection System)
+
+
+Gerçek zamanlı dashboard + telemetri
+
+
+Savunma scriptleri (anti-manipulation filters)
+
+
+
+👥 Takım Notları
+Her öğrenci kendi senaryosu için ayrı branch açar
+
+
+Pipeline her senaryoyu otomatik olarak işler
+
+
+Codespace sayesinde herkes Linux kurmadan çalışabilir
+
+
+Tüm testler vcan0 üzerinden tekrarlanabilir ve deterministik sonuç verir
 
