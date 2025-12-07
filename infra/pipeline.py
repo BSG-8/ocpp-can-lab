@@ -1,5 +1,7 @@
 # infra/pipeline.py
 
+
+from infra.logger import LOGGER
 from infra.mapping import ocpp_to_can
 import can
 import importlib
@@ -64,14 +66,29 @@ async def process_ocpp_message(action, payload, ws):
         "action": action,
         "payload": payload,
     }
+
     await ws.send(str(message))
+    LOGGER.log_ocpp(
+        direction="sent",
+        action=action,
+        payload=payload
+    )
     print(f"[PIPELINE] Sent OCPP → {message}")
+
 
     # ---- 3. RECEIVE OCPP REPLY ----
     reply = await ws.recv()
 
     # ---- 4. SCENARIO HOOK: post_ocpp() ----
     reply = scenario.post_ocpp(action, payload, reply)
+
+    LOGGER.log_ocpp(
+    direction="received",
+    action=action,
+    payload=payload,
+    reply=reply
+    )
+
     print(f"[PIPELINE] Received OCPP reply ← {reply}")
 
     # ---- 5. MAP OCPP → CAN ----
@@ -96,6 +113,14 @@ async def process_ocpp_message(action, payload, ws):
         is_extended_id=False
     )
     bus.send(msg)
+    
+    # log CAN
+    LOGGER.log_can(
+        direction="sent",
+        frame=can_frame,
+    )
+
+
     print(f"[PIPELINE] Sent CAN frame → {msg}")
 
     # ---- 8. SCENARIO HOOK: post_can() ----

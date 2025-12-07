@@ -9,7 +9,25 @@ Scenarios can override these methods to:
 """
 
 
+from infra.logger import LOGGER
+
+
+
+
 class ScenarioHooks:
+
+    def log(self, message: str):
+        """
+        Convenience helper for scenarios.
+        Writes a free-form message into scenario_log.jsonl.
+        """
+        LOGGER.log_scenario(message)
+
+
+
+
+
+
     def pre_ocpp(self, action, payload):
         """
         Called BEFORE sending OCPP to CSMS.
