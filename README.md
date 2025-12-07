@@ -1,66 +1,49 @@
 # 🔌 OCPP–CAN Güvenlik Laboratuvarı
 
-<div align="center">
-
-**Elektrikli Araç Şarj Altyapısı Saldırı/Savunma Simülasyon Ortamı**
-
-*Elektrikli araç şarj altyapısı için modüler güvenlik test çerçevesi*
-
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Lisans](https://img.shields.io/badge/lisans-MIT-green.svg)](LICENSE)
-[![OCPP](https://img.shields.io/badge/OCPP-1.6%20%7C%202.0-orange.svg)](https://www.openchargealliance.org/)
-
-</div>
-
----
+**EV Charging Infrastructure Attack/Defense Simulation Environment**
 
 ## 📖 Genel Bakış
 
-**OCPP–CAN Güvenlik Laboratuvarı**, Elektrikli Araç (EV) şarj altyapısını güvenlik açısından test etmek için geliştirilmiş modüler bir simülasyon laboratuvarıdır. Proje, OCPP mesaj akışı ile EV iç CAN-Bus davranışını birleştirerek saldırı senaryoları ve savunma mekanizmaları geliştirmeyi amaçlar.
+OCPP–CAN Güvenlik Laboratuvarı, Elektrikli Araç (EV) şarj altyapısını güvenlik açısından modellemek ve analiz etmek için oluşturulmuş modüler bir simülasyon ortamıdır. Proje, OCPP mesaj akışı ile EV içindeki CAN-Bus davranışını birleştirerek saldırı senaryolarının modellenmesini mümkün kılar.
 
-Bu çerçeve, **Şarj Noktası (CP)** ile **Merkezi Sistem Yönetim Sistemleri (CSMS)** arasındaki gerçek dünya iletişim akışını simüle eder ve EV tarafındaki CAN-Bus davranışı ile genişletilmiştir.
+Bu yapı, Şarj Noktası (CP) ile Merkezi Sistem Yönetim Sistemi (CSMS) arasındaki gerçek dünya iletişimini simüle eder ve EV tarafındaki CAN-Bus davranışlarıyla genişletilir.
 
-### ⚡ Ana Özellikler
+## ⚡ Ana Özellikler
 
-- 🔄 **OCPP İstemci & Sunucu Emülasyonu** - Tam şarj noktası protokol simülasyonu
-- 🔀 **OCPP → CAN Çeviri Katmanı** - Şarj protokolü ile araç veri yolu arasında köprü
-- 🚌 **CAN-Bus Simülasyonu** - Gerçekçi test için sanal CAN arayüzü (vcan0)
-- 🎯 **Saldırı Senaryoları** - Modüler anomali enjeksiyon sistemi
-- 🛡️ **Geleceğe Hazır** - IDS, ML/RAG analizi ve savunma mekanizmaları için tasarlanmış
+- 🔄 **OCPP İstemci & Sunucu Emülasyonu** – Tam şarj noktası protokol simülasyonu
+- 🔀 **OCPP → CAN Çeviri Katmanı** – OCPP mesajlarının CAN-Bus verisine dönüştürülmesi
+- 🚌 **CAN-Bus Simülasyonu** – vcan0 tabanlı sanal araç veri yolu
+- 🎯 **Modüler Saldırı Senaryoları** – Hook tabanlı anomali enjeksiyon sistemi
+- 🛡 **Geleceğe Uygun** – IDS, telemetri ve savunma mekanizmaları eklemeye hazır mimari
 
----
-
-## 🏗️ Proje Yapısı
+## 🏗 Proje Yapısı
 
 ```
 ocpp-can-lab/
 │
-├── 📁 infra/                      # Temel altyapı bileşenleri
-│   ├── ocpp_client.py             # Şarj Noktası emülatörü
-│   ├── ocpp_server.py             # CSMS emülatörü
-│   ├── mapping.py                 # OCPP → CAN dönüşüm mantığı
-│   ├── pipeline.py                # Hook sistemi + CP işlem hattı
-│   ├── setup_vcan.sh              # VCAN kurulum scripti
-│   └── __init__.py
+├── infra/                      # Temel altyapı bileşenleri
+│   ├── ocpp_client.py          # Şarj Noktası (CP) emülatörü
+│   ├── ocpp_server.py          # CSMS emülatörü
+│   ├── mapping.py              # OCPP → CAN dönüşüm mantığı
+│   ├── pipeline.py             # Hook sistemi + işlem hattı
+│   ├── setup_vcan.sh           # VCAN kurulumu
+│   └── _init_.py
 │
-├── 📁 scenarios/                  # Senaryolar (her biri kendi klasöründe)
-│   ├── _template/                 # Yeni senaryolar için şablon
-│   ├── scenario_00_baseline/      # Temel senaryo (saldırı yok)
-│   └── scenario_01_*/             # Örnek saldırı senaryoları
+├── scenarios/                  # Senaryolar (her biri kendi klasöründe)
+│   ├── _template/              # Yeni senaryo şablonu
+│   ├── scenario_00_baseline/   # Temiz referans senaryosu (saldırı yok)
+│   └── scenario_01_*/          # Örnek saldırı senaryoları
 │
-├── 📁 logs/                       # Çalışma çıktıları (git'de ignore)
-│
-├── 📁 .devcontainer/              # Codespaces geliştirme ortamı
-├── requirements.txt               # Python bağımlılıkları
-├── config.json                    # Proje yapılandırması
+├── logs/                       # Çalışma çıktıları (gitignore)
+├── .devcontainer/              # Codespaces geliştirme ortamı
+├── requirements.txt            # Python bağımlılıkları
+├── config.json                 # Proje yapılandırması
 └── README.md
 ```
 
----
-
 ## 🚀 Hızlı Başlangıç
 
-### 1️⃣ Sanal Ortamı Kurun
+### 1️⃣ Sanal Ortamı Kurun (Yalnızca Linux)
 
 ```bash
 python3 -m venv venv
@@ -76,167 +59,86 @@ sudo bash infra/setup_vcan.sh
 
 Bu komut otomatik olarak `vcan0` sanal CAN arayüzünü oluşturur.
 
-### 3️⃣ CSMS Sunucusunu Başlatın
+## ▶ Çalıştırma Sırası
+
+Her komut ayrı bir terminalde çalıştırılmalıdır. Sistem daima şu sırayı izler:
+
+### Terminal 1 — CSMS Sunucusunu Başlatın
 
 ```bash
 python -m infra.ocpp_server
 ```
 
-### 4️⃣ Şarj Noktası İstemcisini Çalıştırın
+### Terminal 2 — Şarj Noktası (CP) İstemcisini Başlatın
 
 ```bash
 python -m infra.ocpp_client
 ```
 
----
+## 🎯 Senaryo Çalıştırma (Opsiyonel)
+
+Senaryolar sunucu çalıştıktan sonra başlatılır. Her zaman ayrı bir terminalde çalıştırılır.
+
+### Terminal 3 — Örnek Senaryo
+
+```bash
+python -m scenarios.scenario_01_debug_backdoor.simulate
+```
+
+Senaryolar, pipeline üzerinden OCPP ve CAN mesajlarını manipüle eder.
 
 ## 🧪 Temel Senaryo (Baseline)
 
-`scenario_00_baseline/` dizini **saldırı içermeyen** temiz bir referans senaryosu içerir. Pipeline işlevselliğini doğrulamak için kullanın.
+`scenario_00_baseline/` dizini saldırı içermeyen referans akışını içerir.
 
-**Temel senaryoyu çalıştırın:**
+Çalıştırmak için (yine ayrı bir terminal):
 
 ```bash
 python -m scenarios.scenario_00_baseline.simulate
 ```
 
-Beklenen çıktı: Anomali içermeyen normal OCPP ↔ CAN iletişim akışı.
-
----
+**Beklenen çıktı:**
+- ✔ Normal OCPP ↔ CAN mesaj akışı
+- ✔ Herhangi bir anomali yok
 
 ## 🧩 Yeni Senaryo Oluşturma
 
-Her senaryo `scenarios/` altında kendi dizininde yaşar:
+Yeni bir senaryo dizin yapısı şöyledir:
 
 ```
-scenarios/scenario_XY_isim/
-   ├── hooks.py          # Saldırı mantığı hook'ları
-   ├── simulate.py       # Senaryo giriş noktası
-   └── README.md         # (Opsiyonel) senaryo dokümantasyonu
+scenarios/scenario_XY_yeni_senaryo/
+   ├── hooks.py        # Hook tabanlı saldırı mantığı
+   ├── simulate.py     # Senaryo giriş noktası
+   └── README.md       # (Opsiyonel) senaryo açıklaması
 ```
 
 ### Hook Fonksiyonları
 
-Pipeline'ın farklı aşamalarında veri manipülasyonu yapın:
-
-| Hook | Tetiklenme Noktası |
-|------|-------------------|
+| Hook | Açıklama |
+|------|----------|
 | `pre_ocpp()` | OCPP mesajı gönderilmeden önce |
 | `post_ocpp()` | OCPP cevabı alındıktan sonra |
 | `pre_can()` | CAN frame gönderilmeden önce |
 | `post_can()` | CAN frame gönderildikten sonra |
 
-### Saldırı Örnekleri
+### Olası Saldırılar
 
-✅ Mesaj manipülasyonu  
-✅ Sahte değer enjeksiyonu  
-✅ Kötü amaçlı paket oluşturma  
-✅ Debug arka kapısı ekleme  
-✅ CAN frame enjeksiyonu  
-
----
-
-## 🛠️ Geliştirici Rehberi
-
-### Yeni Senaryo Oluşturma
-
-```bash
-# Feature branch oluştur
-git checkout dev
-git pull
-git checkout -b feature/scenario_xx
-
-# Şablonu kopyala
-cp -r scenarios/_template scenarios/scenario_xx_yeni_saldiri
-
-# hooks.py içinde hook'larınızı geliştirin
-# Yerel olarak test edin
-python -m scenarios.scenario_xx_yeni_saldiri.simulate
-```
-
-### Commit ve Push
-
-```bash
-git add .
-git commit -m "Senaryo XX eklendi: [saldırı açıklaması]"
-git push origin feature/scenario_xx
-```
-
-`dev` branch'ine merge etmek için Pull Request açın.
-
----
-
-## 🔐 Yol Haritası
-
-- [ ] 12 anomali saldırı senaryosunun tamamlanması
-- [ ] CAN + OCPP için Saldırı Tespit Sistemi (IDS)
-- [ ] Telemetri ile gerçek zamanlı izleme panosu
-- [ ] Savunma scriptleri (anti-manipülasyon filtreleri)
-- [ ] Makine Öğrenimi tabanlı anomali tespiti
-- [ ] RAG (Retrieval-Augmented Generation) analiz araçları
-
----
-
-## 👥 Takım İşbirliği
-
-- 🌿 Her öğrenci senaryosu için **ayrı branch** oluşturur
-- ⚙️ Pipeline tüm senaryoları otomatik olarak işler
-- ☁️ **Codespaces hazır** - Linux kurulumu gerektirmez
-- 🔄 Tüm testler `vcan0` üzerinde çalışır - **deterministik** ve **tekrarlanabilir**
-
----
-
-## 📊 Test ve Doğrulama
-
-### Tüm Senaryoları Çalıştır
-
-```bash
-# Tüm senaryoları sırayla çalıştır
-for scenario in scenarios/scenario_*/; do
-    python -m "${scenario%/}.simulate"
-done
-```
-
-### CAN Trafiğini İzle
-
-```bash
-# Gerekirse can-utils kurun
-sudo apt-get install can-utils
-
-# Sanal CAN arayüzünü izle
-candump vcan0
-```
-
----
-
-## 🤝 Katkıda Bulunma
-
-1. Repository'yi fork edin
-2. Feature branch'inizi oluşturun (`git checkout -b feature/MuhteşemSenaryo`)
-3. Değişikliklerinizi commit edin (`git commit -m 'Muhteşem saldırı senaryosu eklendi'`)
-4. Branch'inizi push edin (`git push origin feature/MuhteşemSenaryo`)
-5. Pull Request açın
-
----
+- Mesaj manipülasyonu
+- Sahte değer enjeksiyonu
+- CAN paket enjeksiyonu
+- Yetkisiz frame yaratma
+- Debug arka kapısı ekleme
 
 ## 📝 Lisans
 
-Bu proje MIT Lisansı altında lisanslanmıştır - detaylar için [LICENSE](LICENSE) dosyasına bakın.
-
----
+Bu proje MIT Lisansı ile lisanslanmıştır. Detaylar için LICENSE dosyasına bakın.
 
 ## 🙏 Teşekkürler
 
-- OCPP spesifikasyonları için Open Charge Alliance
-- CAN bus kütüphaneleri için Python-CAN topluluğu
-- EV güvenliği alanındaki tüm katkıda bulunanlar ve araştırmacılar
+- OCPP protokolü için Open Charge Alliance
+- CAN-bus için Python-CAN topluluğu
+- EV güvenliği araştırmaları yürüten tüm araştırmacılar
 
 ---
 
-<div align="center">
-
-**EV Altyapı Güvenliği Araştırması için ❤️ ile geliştirildi**
-
-⭐ Faydalı bulduysanız bu repo'ya yıldız verin!
-
-</div>
+**EV altyapı güvenliği için ❤ ile geliştirilmiştir.**
