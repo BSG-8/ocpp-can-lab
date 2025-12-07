@@ -2,11 +2,12 @@ import asyncio
 import websockets
 from infra.pipeline import process_ocpp_message   # NEW — use pipeline
 
+from infra.config import CONFIG
 
 # -----------------------------------------
 # CONFIGURATION
 # -----------------------------------------
-CSMS_URL = "ws://localhost:9000"
+CSMS_URL = CONFIG["csms_url"]
 
 
 # -----------------------------------------

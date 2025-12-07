@@ -1,0 +1,6 @@
+{
+  "csms_url": "ws://localhost:9000",
+  "vcan_channel": "vcan0",
+  "default_scenario": "scenario_00_baseline",
+  "log_level": "INFO"
+}

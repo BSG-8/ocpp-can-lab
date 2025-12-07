@@ -1,6 +1,5 @@
 # infra/pipeline.py
-
-
+from infra.config import CONFIG
 from infra.logger import LOGGER
 from infra.mapping import ocpp_to_can
 import can
@@ -10,7 +9,7 @@ from infra.scenario_base import ScenarioHooks
 # -----------------------------------------
 # ACTIVE SCENARIO
 # -----------------------------------------
-ACTIVE_SCENARIO = "scenario_00_baseline"
+ACTIVE_SCENARIO = CONFIG["default_scenario"]
 
 
 # -----------------------------------------
@@ -106,14 +105,17 @@ async def process_ocpp_message(action, payload, ws):
         return reply
 
     # ---- 7. SEND CAN FRAME VIA vcan0 ----
-    bus = can.interface.Bus(channel="vcan0", interface="socketcan")
+    VCAN_CHANNEL = CONFIG["vcan_channel"]
+    bus = can.interface.Bus(channel=VCAN_CHANNEL, interface="socketcan")
+
+
     msg = can.Message(
         arbitration_id=can_frame["id"],
         data=can_frame["data"],
         is_extended_id=False
     )
     bus.send(msg)
-    
+
     # log CAN
     LOGGER.log_can(
         direction="sent",

@@ -15,6 +15,7 @@ venv/
 .devcontainer/target/
 .devcontainer/.cache/
 
+
 # Logs
 *.log
 logs/
