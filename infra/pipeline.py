@@ -72,7 +72,7 @@ async def process_ocpp_message(action, payload, ws):
         action=action,
         payload=payload
     )
-    print(f"[PIPELINE] Sent OCPP → {message}")
+    print(f"[PIPELINE] Sent OCPP -> {message}")
 
 
     # ---- 3. RECEIVE OCPP REPLY ----
@@ -88,7 +88,7 @@ async def process_ocpp_message(action, payload, ws):
     reply=reply
     )
 
-    print(f"[PIPELINE] Received OCPP reply ← {reply}")
+    print(f"[PIPELINE] Received OCPP reply <- {reply}")
 
     # ---- 5. MAP OCPP → CAN ----
     can_frame = ocpp_to_can(action, payload)
@@ -96,7 +96,7 @@ async def process_ocpp_message(action, payload, ws):
         print(f"[PIPELINE] No CAN mapping for action '{action}'")
         return reply
 
-    print(f"[PIPELINE] CAN frame produced → {can_frame}")
+    print(f"[PIPELINE] CAN frame produced -> {can_frame}")
 
     # ---- 6. SCENARIO HOOK: pre_can() ----
     can_frame = scenario.pre_can(can_frame)
@@ -123,7 +123,7 @@ async def process_ocpp_message(action, payload, ws):
     )
 
 
-    print(f"[PIPELINE] Sent CAN frame → {msg}")
+    print(f"[PIPELINE] Sent CAN frame -> {msg}")
 
     # ---- 8. SCENARIO HOOK: post_can() ----
     scenario.post_can(can_frame)
