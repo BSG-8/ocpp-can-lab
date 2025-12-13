@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost Charge Attack Simulation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: rgba(25, 25, 35, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-orange: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --glow-blue: 0 0 30px rgba(59, 130, 246, 0.3);
+            --glow-red: 0 0 30px rgba(239, 68, 68, 0.3);
+            --glow-green: 0 0 30px rgba(16, 185, 129, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-top: 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--accent-green);
+        }
+
+        .status-badge.disconnected {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--accent-red);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        @media (max-width: 1024px) {
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        /* Architecture Diagram */
+        .architecture {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 768px) {
+            .architecture {
+                grid-column: span 1;
+            }
+        }
+
+        .arch-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding: 1rem;
+        }
+
+        .arch-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            min-width: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .arch-node.meter {
+            border-color: rgba(6, 182, 212, 0.5);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.1);
+        }
+
+        .arch-node.cp {
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
+        }
+
+        .arch-node.csms {
+            border-color: rgba(245, 158, 11, 0.5);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
+        }
+
+        .arch-node.active {
+            animation: node-pulse 1s infinite;
+        }
+
+        @keyframes node-pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+        }
+
+        .arch-node-icon {
+            font-size: 2rem;
+        }
+
+        .arch-node-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .arch-node-port {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .arch-arrow {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .arch-arrow.attack {
+            color: var(--accent-red);
+            animation: arrow-flash 0.5s infinite;
+        }
+
+        @keyframes arrow-flash {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Energy Gauges */
+        .gauge-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .gauge {
+            position: relative;
+            width: 160px;
+            height: 160px;
+        }
+
+        .gauge-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 12;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke-width: 12;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: center;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .gauge-fill.physical {
+            stroke: url(#gradient-blue);
+        }
+
+        .gauge-fill.reported {
+            stroke: url(#gradient-red);
+        }
+
+        .gauge-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .gauge-value-number {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .gauge-value-unit {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .gauge-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        /* Control Panel */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: var(--glow-green);
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: var(--glow-red);
+        }
+
+        .btn-stop:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Attack Toggle */
+        .attack-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 0.75rem;
+        }
+
+        .attack-toggle.active {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.5);
+            animation: attack-glow 1s infinite;
+        }
+
+        @keyframes attack-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(239, 68, 68, 0.4);
+            }
+        }
+
+        .attack-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .attack-label {
+            font-weight: 600;
+            color: var(--accent-red);
+        }
+
+        .attack-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            width: 56px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+            transition: 0.3s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        input:checked+.slider {
+            background: var(--accent-red);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(28px);
+        }
+
+        /* Chart Section */
+        .chart-container {
+            height: 250px;
+            position: relative;
+        }
+
+        /* Log Panel */
+        .log-panel {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 768px) {
+            .log-panel {
+                grid-column: span 1;
+            }
+        }
+
+        .log-container {
+            height: 300px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.8rem;
+        }
+
+        .log-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .log-entry {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .log-time {
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .log-source {
+            font-weight: 600;
+            flex-shrink: 0;
+            min-width: 60px;
+        }
+
+        .log-source.system {
+            color: var(--accent-green);
+        }
+
+        .log-source.csms {
+            color: var(--accent-orange);
+        }
+
+        .log-source.cp {
+            color: var(--accent-purple);
+        }
+
+        .log-source.meter {
+            color: var(--accent-cyan);
+        }
+
+        .log-source.attack {
+            color: var(--accent-red);
+        }
+
+        .log-source.error {
+            color: var(--accent-red);
+        }
+
+        .log-message {
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            flex: 1;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 0.25rem;
+        }
+
+        .stat-value.loss {
+            color: var(--accent-red);
+        }
+
+        /* SVG Gradients */
+        .svg-defs {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-animation"></div>
+
+    <!-- SVG Gradient Definitions -->
+    <svg class="svg-defs">
+        <defs>
+            <linearGradient id="gradient-blue" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#3b82f6" />
+                <stop offset="100%" style="stop-color:#06b6d4" />
+            </linearGradient>
+            <linearGradient id="gradient-red" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#ef4444" />
+                <stop offset="100%" style="stop-color:#f59e0b" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>👻 Ghost Charge Attack</h1>
+            <p>EV Şarj İstasyonu Hayalet Şarj Saldırısı Simülasyonu</p>
+            <div id="connectionStatus" class="status-badge disconnected">
+                <span class="status-dot"></span>
+                <span id="statusText">Bağlantı bekleniyor...</span>
+            </div>
+        </header>
+
+        <!-- Architecture + Controls Row -->
+        <div class="grid grid-3" style="margin-bottom: 1.5rem;">
+            <!-- Architecture Diagram -->
+            <div class="card architecture">
+                <div class="card-title">📐 Sistem Mimarisi</div>
+                <div class="arch-diagram">
+                    <div class="arch-node meter" id="archMeter">
+                        <span class="arch-node-icon">⚡</span>
+                        <span class="arch-node-label">Sayaç</span>
+                        <span class="arch-node-port">Virtual Meter</span>
+                    </div>
+                    <span class="arch-arrow">→</span>
+                    <div class="arch-node cp" id="archCP">
+                        <span class="arch-node-icon">🔌</span>
+                        <span class="arch-node-label">Charge Point</span>
+                        <span class="arch-node-port">OCPP Client</span>
+                    </div>
+                    <span class="arch-arrow" id="archArrow">→</span>
+                    <div class="arch-node csms" id="archCSMS">
+                        <span class="arch-node-icon">🖥️</span>
+                        <span class="arch-node-label">CSMS</span>
+                        <span class="arch-node-port">Port 9000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="card">
+                <div class="card-title">🎮 Kontrol Paneli</div>
+                <div class="controls">
+                    <button class="btn btn-start" id="startStopBtn" onclick="toggleSimulation()">
+                        <span id="btnIcon">▶️</span>
+                        <span id="btnText">Simülasyonu Başlat</span>
+                    </button>
+                    <div class="attack-toggle" id="attackToggle">
+                        <div class="attack-info">
+                            <span class="attack-label">⚠️ Saldırı Modu</span>
+                            <span class="attack-desc">CP sahte veri (0.01 kWh) raporlar</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="attackSwitch" onchange="toggleAttack()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Energy Gauges Row -->
+        <div class="grid grid-3" style="margin-bottom: 1.5rem;">
+            <!-- Physical Energy -->
+            <div class="card">
+                <div class="card-title">⚡ Fiziksel Tüketim</div>
+                <div class="gauge-container">
+                    <div class="gauge">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="gauge-bg" cx="50" cy="50" r="42" />
+                            <circle class="gauge-fill physical" id="physicalGauge" cx="50" cy="50" r="42"
+                                stroke-dasharray="264" stroke-dashoffset="264" />
+                        </svg>
+                        <div class="gauge-value">
+                            <div class="gauge-value-number" id="physicalValue">0.00</div>
+                            <div class="gauge-value-unit">kWh</div>
+                        </div>
+                    </div>
+                    <div class="gauge-label">Gerçek enerji tüketimi</div>
+                </div>
+            </div>
+
+            <!-- Reported Energy -->
+            <div class="card">
+                <div class="card-title">📊 Raporlanan Tüketim</div>
+                <div class="gauge-container">
+                    <div class="gauge">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="gauge-bg" cx="50" cy="50" r="42" />
+                            <circle class="gauge-fill reported" id="reportedGauge" cx="50" cy="50" r="42"
+                                stroke-dasharray="264" stroke-dashoffset="264" />
+                        </svg>
+                        <div class="gauge-value">
+                            <div class="gauge-value-number" id="reportedValue">0.00</div>
+                            <div class="gauge-value-unit">kWh</div>
+                        </div>
+                    </div>
+                    <div class="gauge-label">CSMS'e bildirilen</div>
+                </div>
+            </div>
+
+            <!-- Loss Calculation -->
+            <div class="card">
+                <div class="card-title">💰 Kayıp Analizi</div>
+                <div class="gauge-container">
+                    <div class="gauge">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="gauge-bg" cx="50" cy="50" r="42" />
+                            <circle class="gauge-fill" id="lossGauge" cx="50" cy="50" r="42" stroke-dasharray="264"
+                                stroke-dashoffset="264" style="stroke: var(--accent-red);" />
+                        </svg>
+                        <div class="gauge-value">
+                            <div class="gauge-value-number loss" id="lossValue">0.00</div>
+                            <div class="gauge-value-unit">kWh</div>
+                        </div>
+                    </div>
+                    <div class="gauge-label">Faturalanmayan enerji</div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-label">Kayıp Oranı</div>
+                        <div class="stat-value loss" id="lossPercent">0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Tahmini Zarar</div>
+                        <div class="stat-value loss" id="lossCost">₺0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart + Logs Row -->
+        <div class="grid grid-2">
+            <!-- Chart -->
+            <div class="card">
+                <div class="card-title">📈 Enerji Grafiği</div>
+                <div class="chart-container">
+                    <canvas id="energyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Logs -->
+            <div class="card">
+                <div class="card-title">📋 Sistem Logları</div>
+                <div class="log-container" id="logContainer">
+                    <div class="log-entry">
+                        <span class="log-time">--:--:--</span>
+                        <span class="log-source system">SYSTEM</span>
+                        <span class="log-message">Bağlantı bekleniyor...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // STATE
+        // ============================================================================
+        let ws = null;
+        let isRunning = false;
+        let attackMode = false;
+        let chart = null;
+        let physicalEnergy = 0;
+        let reportedEnergy = 0;
+        const ELECTRICITY_PRICE = 2.5; // ₺/kWh
+
+        // ============================================================================
+        // DOM ELEMENTS
+        // ============================================================================
+        const connectionStatus = document.getElementById('connectionStatus');
+        const statusText = document.getElementById('statusText');
+        const startStopBtn = document.getElementById('startStopBtn');
+        const btnIcon = document.getElementById('btnIcon');
+        const btnText = document.getElementById('btnText');
+        const attackToggle = document.getElementById('attackToggle');
+        const attackSwitch = document.getElementById('attackSwitch');
+        const logContainer = document.getElementById('logContainer');
+
+        // Gauges
+        const physicalGauge = document.getElementById('physicalGauge');
+        const reportedGauge = document.getElementById('reportedGauge');
+        const lossGauge = document.getElementById('lossGauge');
+        const physicalValue = document.getElementById('physicalValue');
+        const reportedValue = document.getElementById('reportedValue');
+        const lossValue = document.getElementById('lossValue');
+        const lossPercent = document.getElementById('lossPercent');
+        const lossCost = document.getElementById('lossCost');
+
+        // Architecture
+        const archMeter = document.getElementById('archMeter');
+        const archCP = document.getElementById('archCP');
+        const archCSMS = document.getElementById('archCSMS');
+        const archArrow = document.getElementById('archArrow');
+
+        // ============================================================================
+        // CHART INITIALIZATION
+        // ============================================================================
+        function initChart() {
+            const ctx = document.getElementById('energyChart').getContext('2d');
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Fiziksel Tüketim',
+                            data: [],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Raporlanan Tüketim',
+                            data: [],
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'second',
+                                displayFormats: { second: 'HH:mm:ss' }
+                            },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#a0a0b0' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#a0a0b0' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#a0a0b0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================================================
+        // WEBSOCKET
+        // ============================================================================
+        function connectWebSocket() {
+            ws = new WebSocket('ws://127.0.0.1:8000/ws');
+
+            ws.onopen = () => {
+                connectionStatus.classList.remove('disconnected');
+                statusText.textContent = 'Bağlandı';
+                logContainer.innerHTML = '';
+                addLog('SYSTEM', 'Backend sunucusuna bağlandı', 'system');
+            };
+
+            ws.onclose = () => {
+                connectionStatus.classList.add('disconnected');
+                statusText.textContent = 'Bağlantı koptu';
+                addLog('SYSTEM', 'Bağlantı koptu, yeniden deneniyor...', 'error');
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            ws.onerror = () => {
+                addLog('SYSTEM', 'WebSocket hatası', 'error');
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleMessage(data);
+            };
+        }
+
+        function handleMessage(data) {
+            if (data.type === 'log') {
+                addLog(data.source, data.message, data.log_type);
+            }
+            else if (data.type === 'data') {
+                const now = new Date();
+
+                // Update attack mode from data
+                if (data.attack_mode !== undefined) {
+                    attackMode = data.attack_mode;
+                }
+
+                if (data.data_type === 'physical') {
+                    physicalEnergy = data.value;
+                    updateGauge(physicalGauge, physicalValue, data.value);
+                    chart.data.datasets[0].data.push({ x: now, y: data.value });
+
+                    // Activate architecture nodes
+                    archMeter.classList.add('active');
+                    setTimeout(() => archMeter.classList.remove('active'), 500);
+                }
+                else if (data.data_type === 'reported') {
+                    reportedEnergy = data.value;
+                    updateGauge(reportedGauge, reportedValue, data.value);
+                    chart.data.datasets[1].data.push({ x: now, y: data.value });
+
+                    archCSMS.classList.add('active');
+                    setTimeout(() => archCSMS.classList.remove('active'), 500);
+                }
+
+                // Update loss only when attack mode is active
+                updateLoss();
+
+                // Trim chart data
+                if (chart.data.datasets[0].data.length > 60) {
+                    chart.data.datasets[0].data.shift();
+                    chart.data.datasets[1].data.shift();
+                }
+                chart.update('quiet');
+            }
+            else if (data.type === 'state') {
+                isRunning = data.is_running;
+                attackMode = data.attack_mode;
+                updateUI();
+            }
+        }
+
+        // ============================================================================
+        // UI UPDATES
+        // ============================================================================
+        function addLog(source, message, type) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+
+            const time = new Date().toLocaleTimeString();
+            entry.innerHTML = `
+                <span class="log-time">${time}</span>
+                <span class="log-source ${type}">${source}</span>
+                <span class="log-message">${message}</span>
+            `;
+
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            // Limit log entries
+            while (logContainer.children.length > 100) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+
+        function updateGauge(gaugeEl, valueEl, value) {
+            const maxValue = 50; // Max kWh for gauge
+            const percent = Math.min(value / maxValue, 1);
+            const offset = 264 * (1 - percent);
+            gaugeEl.style.strokeDashoffset = offset;
+            valueEl.textContent = value.toFixed(2);
+        }
+
+        function updateLoss() {
+            // Only calculate loss when attack mode is active
+            if (attackMode && physicalEnergy > 0 && reportedEnergy >= 0) {
+                const loss = Math.max(0, physicalEnergy - reportedEnergy);
+                updateGauge(lossGauge, lossValue, loss);
+
+                const percent = (loss / physicalEnergy * 100);
+                lossPercent.textContent = percent.toFixed(1) + '%';
+
+                const cost = loss * ELECTRICITY_PRICE;
+                lossCost.textContent = '₺' + cost.toFixed(2);
+            } else {
+                // No attack mode - no loss
+                updateGauge(lossGauge, lossValue, 0);
+                lossPercent.textContent = '0%';
+                lossCost.textContent = '₺0.00';
+            }
+        }
+
+        function updateUI() {
+            // Button state
+            if (isRunning) {
+                startStopBtn.className = 'btn btn-stop';
+                btnIcon.textContent = '⏹️';
+                btnText.textContent = 'Simülasyonu Durdur';
+            } else {
+                startStopBtn.className = 'btn btn-start';
+                btnIcon.textContent = '▶️';
+                btnText.textContent = 'Simülasyonu Başlat';
+            }
+
+            // Attack mode
+            attackSwitch.checked = attackMode;
+            if (attackMode) {
+                attackToggle.classList.add('active');
+                archArrow.classList.add('attack');
+                archArrow.textContent = '⚡';
+            } else {
+                attackToggle.classList.remove('active');
+                archArrow.classList.remove('attack');
+                archArrow.textContent = '→';
+            }
+        }
+
+        // ============================================================================
+        // CONTROLS
+        // ============================================================================
+        function toggleSimulation() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+            if (isRunning) {
+                ws.send('STOP');
+            } else {
+                // Reset values
+                physicalEnergy = 0;
+                reportedEnergy = 0;
+                updateGauge(physicalGauge, physicalValue, 0);
+                updateGauge(reportedGauge, reportedValue, 0);
+                updateGauge(lossGauge, lossValue, 0);
+                lossPercent.textContent = '0%';
+                lossCost.textContent = '₺0';
+
+                // Clear chart
+                chart.data.datasets[0].data = [];
+                chart.data.datasets[1].data = [];
+                chart.update();
+
+                ws.send('START');
+            }
+        }
+
+        function toggleAttack() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            ws.send('TOGGLE_ATTACK');
+        }
+
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            connectWebSocket();
+        });
+    </script>
+</body>
+
+</html>
