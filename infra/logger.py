@@ -69,5 +69,16 @@ class Logger:
             f.write(json.dumps(record) + "\n")
 
 
+    def log_scenario_meta(self, scenario_name: str):
+        """
+        Logs scenario metadata once per run.
+        """
+        record = {
+            "time": datetime.now().isoformat(),
+            "type": "scenario_meta",
+            "scenario": scenario_name,
+        }
+        with open(self.scenario_log_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record) + "\n")
 # Singleton-style global logger instance
 LOGGER = Logger()

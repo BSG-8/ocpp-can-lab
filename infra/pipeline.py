@@ -24,6 +24,9 @@ def load_scenario():
         module_path = f"scenarios.{ACTIVE_SCENARIO}.hooks"
         module = importlib.import_module(module_path)
 
+        # LOG ACTIVE SCENARIO ONCE
+        LOGGER.log_scenario_meta(ACTIVE_SCENARIO)
+
         # Find class inside module
         for attr in dir(module):
             obj = getattr(module, attr)

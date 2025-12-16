@@ -101,6 +101,16 @@ python -m scenarios.scenario_00_baseline.simulate
 - ✔ Normal OCPP ↔ CAN mesaj akışı
 - ✔ Herhangi bir anomali yok
 
+## 📊 Log Görüntüleyici (Log Viewer)
+
+Simülasyon çıktılarını görsel olarak incelemek için dahili log görüntüleyiciyi kullanabilirsiniz.
+
+```bash
+streamlit run log_viewer/app.py
+```
+
+Tarayıcınızda otomatik olarak açılacaktır (`http://localhost:8501`). Tüm OCPP,CAN ve simülasyon mesajlarını zaman çizelgesi üzerinde görebilirsiniz.
+
 ## 🧩 Yeni Senaryo Oluşturma
 
 Yeni bir senaryo dizin yapısı şöyledir:
